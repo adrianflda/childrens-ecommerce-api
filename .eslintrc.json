@@ -39,8 +39,7 @@
     "camelcase": [
       "error",
       {
-        "allow": [
-        ],
+        "allow": [],
         "properties": "never"
       }
     ],
@@ -59,10 +58,9 @@
     "import/no-extraneous-dependencies": [
       "error",
       {
-        "devDependencies": [
-          "**/*.test.ts",
-          "**/*.spec.ts"
-        ]
+        "devDependencies": false,
+        "optionalDependencies": false,
+        "peerDependencies": false
       }
     ],
     "no-unused-vars": "off",
@@ -102,5 +100,15 @@
   "plugins": [
     "@typescript-eslint"
   ],
-  "settings": {}
+  "settings": {
+    "import/resolver": {
+      "node": {},
+    },
+  },
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true,
+    "jest": true
+  },
 }
