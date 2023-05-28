@@ -14,5 +14,3 @@ export const getAppInfo: RequestHandler = async (
   };
   res.send(externalizedAppInfo);
 };
-
-export default getAppInfo;

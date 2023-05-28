@@ -3,14 +3,14 @@ import {
   format,
   transports
 } from 'winston';
-import ConsoleLoggerTransport from './lib/winston-console-transport';
+import ConsoleLoggerTransport from './lib/log';
 
-const logTransports = [
+const logTransports: any[] = [
   new transports.File({
     level: 'error',
     filename: './logs/error.log',
     format: format.json({
-      replacer: (key, value) => {
+      replacer: (key: string, value: any) => {
         if (key === 'error') {
           return {
             message: (value as Error).message,

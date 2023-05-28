@@ -80,6 +80,10 @@
     "quotes": [
       "error",
       "single"
+    ],
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": [
+      "error"
     ]
   },
   "overrides": [
@@ -102,13 +106,13 @@
   ],
   "settings": {
     "import/resolver": {
-      "node": {},
-    },
+      "node": {}
+    }
   },
   "env": {
     "browser": true,
     "es6": true,
     "node": true,
     "jest": true
-  },
+  }
 }

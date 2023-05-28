@@ -3,10 +3,9 @@ import dotenv from 'dotenv';
 
 const result = dotenv.config();
 if (result.error) {
-  dotenv.config({ path: '.env.default' });
+  dotenv.config({ path: '.env' });
 }
 
-import util from 'util';
 import app from './app';
 import logger from './logger';
 
