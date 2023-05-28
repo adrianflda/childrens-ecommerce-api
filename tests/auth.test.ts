@@ -1,30 +1,50 @@
 import request from 'supertest';
 import app from '../src/app';
 import { getUrl } from '../src/utils';
+import { TEST_USER_1 } from './data/user';
 
-export const login = async (email: string, password: string) => {
-  const loginResponse = await request(app)
-    .post(getUrl('/login'))
-    .send({ name: email, password: password })
-    .set('Accept', 'application/json');
-  expect(loginResponse.status).toBe(200);
-  return loginResponse.body.token;
-}
+export const signup = async (
+  username: string,
+  password: string,
+  confirmPassword: string
+) => request(app)
+  .post(getUrl('/auth/signup'))
+  .send({ username, password, confirmPassword })
+  .set('Accept', 'application/json');
+
+export const login = async (
+  username: string,
+  password: string
+) => request(app)
+  .post(getUrl('/auth/login'))
+  .send({ username, password })
+  .set('Accept', 'application/json');
 
 describe('Authentication/Authorization tests', () => {
   let token: string | null = null;
   beforeAll(async () => {
-    token = await login('jhon@email.com', 'password');
+    await signup(TEST_USER_1.username, TEST_USER_1.password, TEST_USER_1.password);
+    const res = await login(TEST_USER_1.username, TEST_USER_1.password);
+    token = res.body.token;
   });
-  
+
   // Test the authentication system by checking if login and logout work as expected
   describe('Authentication', () => {
-    it('returns 200 if login go well', async () => {
-      await login('jhon@email.com', 'password');
+    it('returns 401 username already in use', async () => {
+      const res = await signup(TEST_USER_1.username, 'password', 'password');
+      expect(res.status).toBe(401);
+    });
+    it('returns 401 confirm password does not match', async () => {
+      const res = await signup(TEST_USER_1.username, 'password', '1234567');
+      expect(res.status).toBe(401);
+    });
+    it('returns 401 wrong username or password', async () => {
+      const res = await login(TEST_USER_1.username, 'wrongPassword');
+      expect(res.status).toBe(401);
     });
     it('returns 200 if logout go well', async () => {
       const res = await request(app)
-        .post(getUrl('/logout'))
+        .post(getUrl('/auth/logout'))
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
     });

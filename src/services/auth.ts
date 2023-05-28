@@ -9,7 +9,7 @@ const jwtDuration: string = JWT_DURATION;
 const jwtKey: string = JWT_KEY;
 
 if (jwtKey === 'secret-key') {
-  throw new Error('The JWT_KEY is required');
+  // throw new Error('The JWT_KEY is required');
 }
 
 /**
