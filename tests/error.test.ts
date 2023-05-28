@@ -1,4 +1,4 @@
-import ApplicationError from '../src/errors/application-error';
+import ApplicationError from '../src/errors/ApplicationError';
 
 const message = 'error message';
 

@@ -1,0 +1,70 @@
+import mongoose, { Document } from 'mongoose';
+import bcrypt from 'bcrypt';
+import IUser from '../interfaces/IUser';
+import { SALT_FACTOR } from '../config';
+
+interface IUserDB extends IUser, Document {}
+
+const UserSchema = new mongoose.Schema({
+  profile: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Profile',
+    default: null
+  },
+  username: {
+    type: String,
+    sparse: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    index: true,
+    required: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  displayName: String,
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  roles: {
+    type: Array,
+    default: ['user']
+  }
+}, {
+  timestamps: true
+});
+
+UserSchema.pre('save', async function (next) {
+  try {
+    const user = this as any;
+    // only hash the password if it has been modified (or is new) and has password
+    if (!user.isModified('password') || user.password === null) {
+      return next();
+    }
+    const salt = await bcrypt.genSalt(SALT_FACTOR);
+    const hash = await bcrypt.hash(user.password, salt);
+    user.password = hash;
+    return next();
+  } catch (error: any) {
+    return next(error);
+  }
+});
+
+async function isValidPassword(this: any, candidatePassword: string) {
+  const user = this as any;
+  // if no password is set, then any password is invalid
+  if (user.password) {
+    return bcrypt.compare(candidatePassword, user.password);
+  }
+  return false;
+};
+
+UserSchema.methods.isValidPassword = isValidPassword;
+
+const UserModel = mongoose.model('User', UserSchema);
+
+export { IUserDB, UserModel };
+export default UserModel;

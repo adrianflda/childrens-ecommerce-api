@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import AppInfoController from '../../controllers/AppInfoController';
+import { getAppInfo } from '../../controllers/info';
 
 const router = Router();
 
 // Endpoints for info
-router.get('/', AppInfoController);
+router.get('/', getAppInfo);
 
 export default router;
