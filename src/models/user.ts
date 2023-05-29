@@ -29,6 +29,10 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  token: {
+    type: String,
+    default: ''
+  },
   roles: {
     type: Array,
     default: ['user']
@@ -41,12 +45,20 @@ UserSchema.pre('save', async function (next) {
   try {
     const user = this as any;
     // only hash the password if it has been modified (or is new) and has password
-    if (!user.isModified('password') || user.password === null) {
-      return next();
+    if (user.isModified('password') || !!user.password) {
+      const salt = await bcrypt.genSalt(SALT_FACTOR);
+      const hash = await bcrypt.hash(user.password, salt);
+      user.password = hash;
     }
-    const salt = await bcrypt.genSalt(SALT_FACTOR);
-    const hash = await bcrypt.hash(user.password, salt);
-    user.password = hash;
+
+    // validate roles to always be sure contain user role
+    if (user.isModified('roles') || !!user.roles) {
+      user.roles = Array.isArray(user.roles) ? user.roles : ['user'];
+      if (!user.roles.includes('user')) {
+        user.roles = ['user', ...user.roles];
+      }
+    }
+
     return next();
   } catch (error: any) {
     return next(error);

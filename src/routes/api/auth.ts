@@ -1,9 +1,12 @@
 import { Router } from 'express';
-import { login, signup } from '../../controllers/auth';
+import passport from 'passport';
+import { signupController, loginController, logoutController } from '../../controllers/auth';
 
 const router = Router();
+const requireAuth = passport.authenticate('jwt');
 
-router.post('/signup', signup);
-router.post('/login', login);
+router.post('/signup', signupController);
+router.post('/login', loginController);
+router.get('/logout', requireAuth, logoutController);
 
 export default router;

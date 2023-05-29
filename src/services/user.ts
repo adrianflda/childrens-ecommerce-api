@@ -1,4 +1,32 @@
+import { ObjectId } from 'mongoose';
+import jwt from 'jsonwebtoken';
 import UserModel, { IUserDB } from '../models/user';
+import { JWT_KEY, JWT_DURATION } from '../config';
+import UnauthenticatedError from '../errors/UnauthenticatedError';
+import BadRequest from '../errors/BadRequest';
+
+const jwtDuration: string = JWT_DURATION;
+
+const jwtKey: string = JWT_KEY;
+
+if (jwtKey === 'secret-key') {
+  // throw new Error('The JWT_KEY is required');
+}
+
+/**
+ *
+ * @param username User name for the new admin to be created
+ * @returns The created user or null if already exist
+ */
+export const verifyAndCreateAdmin = async (username?: string): Promise<IUserDB | null> => {
+  const newUsername = username || 'admin';
+  const userFound = await UserModel.findOne({ username: newUsername });
+  return userFound || UserModel.create({
+    username: newUsername,
+    password: newUsername,
+    roles: ['user', 'admin']
+  });
+};
 
 /**
     *
@@ -11,6 +39,36 @@ export const getUserByUsername = (
   options: any = {}
 ): Promise<IUserDB | null> => {
   let promise = UserModel.findOne({ username });
+
+  if (options.populate) {
+    promise = promise.populate([
+      {
+        path: 'profile',
+        populate: {
+          path: 'profile'
+        }
+      }
+    ]);
+  }
+
+  if (options.lean) {
+    promise = promise.lean();
+  }
+
+  return promise;
+};
+
+/**
+    *
+    * @param username String
+    * @param options Object
+    * @returns An user if found or null
+    */
+export const getUserById = (
+  userId: ObjectId,
+  options: any = {}
+): Promise<IUserDB | null> => {
+  let promise = UserModel.findOne({ _id: userId });
 
   if (options.populate) {
     promise = promise.populate([
@@ -48,4 +106,86 @@ export const createUser = (
     displayName
   };
   return UserModel.create(user);
+};
+
+/**
+    *
+    * @param user User to be created
+    * @returns The new token
+    */
+export const createAuthToken = async (
+  user: IUserDB
+): Promise<string> => {
+  const token = jwt.sign(
+    {
+      user: {
+        _id: user._id,
+        username: user.username,
+        roles: user.roles
+      }
+    },
+    jwtKey,
+    {
+      expiresIn: jwtDuration
+    }
+  );
+
+  await UserModel.updateOne({ _id: user._id }, { token });
+  return token;
+};
+
+export const removeAuthToken = async (user: IUserDB): Promise<void> => {
+  await UserModel.updateOne({ _id: user._id }, { token: '' });
+};
+
+/**
+    *
+    * @param jwtToken The token to be validate
+    * @returns True or False if valid
+    */
+export const isAuthTokenValid = (
+  jwtToken: string
+): boolean => {
+  if (!jwtToken) {
+    throw new UnauthenticatedError('No valid temporary access token found');
+  }
+
+  const decodedToken = jwt.verify(jwtToken, jwtKey) as jwt.JwtPayload;
+  if (!decodedToken) {
+    throw new UnauthenticatedError('No valid temporary access token found');
+  }
+  if (!decodedToken.exp) {
+    throw new UnauthenticatedError('No valid temporary access token found');
+  }
+
+  const today = Date.now() / 1000;
+  if (today > decodedToken.exp) {
+    throw new UnauthenticatedError('Expired temporary access token');
+  }
+  return true;
+};
+
+/**
+    *
+    * @param jwtToken The token to find an user
+    * @returns The user found or null
+    */
+export const getUserForAuthToken = async (
+  jwtToken: string
+): Promise<IUserDB | null> => {
+  const payload: any = jwt.verify(jwtToken, jwtKey);
+  if (payload) {
+    return UserModel.findById(payload.id);
+  }
+  return null;
+};
+
+export const updateUserRoles = async (userId: string, newRoles: string[]) => {
+  if (!userId.trim()) {
+    throw new BadRequest('userId is required and well formed');
+  }
+  if (!Array.isArray(newRoles)) {
+    throw new BadRequest('roles must be an array');
+  }
+  return UserModel.findByIdAndUpdate({ _id: userId }, { roles: newRoles });
 };

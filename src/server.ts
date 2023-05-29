@@ -7,7 +7,7 @@ if (result.error) {
 }
 
 import app from './app';
-import logger from './logger';
+import logger from './lib/logger';
 
 const PORT = process.env.PORT || 3000;
 

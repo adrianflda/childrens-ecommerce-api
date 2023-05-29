@@ -2,23 +2,7 @@ import request from 'supertest';
 import app from '../src/app';
 import { getUrl } from '../src/utils';
 import { TEST_USER_1 } from './data/user';
-
-export const signup = async (
-  username: string,
-  password: string,
-  confirmPassword: string
-) => request(app)
-  .post(getUrl('/auth/signup'))
-  .send({ username, password, confirmPassword })
-  .set('Accept', 'application/json');
-
-export const login = async (
-  username: string,
-  password: string
-) => request(app)
-  .post(getUrl('/auth/login'))
-  .send({ username, password })
-  .set('Accept', 'application/json');
+import { login, signup } from './index.test';
 
 describe('Authentication/Authorization tests', () => {
   let token: string | null = null;
@@ -44,7 +28,7 @@ describe('Authentication/Authorization tests', () => {
     });
     it('returns 200 if logout go well', async () => {
       const res = await request(app)
-        .post(getUrl('/auth/logout'))
+        .get(getUrl('/auth/logout'))
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
     });
@@ -54,12 +38,12 @@ describe('Authentication/Authorization tests', () => {
   describe('Authorization', () => {
     it('returns 401 if token is not provided for protected endpoints', async () => {
       const res = await request(app)
-        .get(getUrl('/product'));
+        .get(getUrl('/user'));
       expect(res.status).toBe(401);
     });
     it('returns 200 if token is provided for protected endpoints', async () => {
       const res = await request(app)
-        .get(getUrl('/product'))
+        .get(getUrl('/user'))
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
     });

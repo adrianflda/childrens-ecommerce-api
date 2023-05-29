@@ -2,14 +2,30 @@ import passport from 'passport';
 import passportLocal from 'passport-local';
 import passportJwt from 'passport-jwt';
 import { Request } from 'express';
-import { IUserDB } from '../models/user';
+import UserModel, { IUserDB } from '../models/user';
 import UnauthorizedError from '../errors/UnauthorizedError';
-import { createUser, getUserByUsername } from '../services/user';
+import {
+  createUser,
+  getUserById,
+  getUserByUsername,
+  isAuthTokenValid
+} from '../services/user';
 import { JWT_KEY } from '../config';
+import UnauthenticatedError from '../errors/UnauthenticatedError';
 
 const LocalStrategy = passportLocal.Strategy;
 const JWTstrategy = passportJwt.Strategy;
 const ExtractJWT = passportJwt.ExtractJwt;
+
+passport.serializeUser((user: any, done) => {
+  done(null, user._id);
+});
+
+passport.deserializeUser((id, done) => {
+  UserModel.findOne({ _id: id })
+    .then(user => done(null, user))
+    .catch(error => done(error));
+});
 
 passport.use(
   'signup',
@@ -73,8 +89,6 @@ passport.use(
         return done(null, user, { message: 'Logged in Successfully' });
       } catch (error) {
         return done(error);
-      } finally {
-        // TODO create session
       }
     }
   )
@@ -88,7 +102,17 @@ passport.use(
     },
     async (token, done) => {
       try {
-        return done(null, token.user);
+        let user;
+        if (token.user && token.user._id) {
+          user = await getUserById(token.user._id);
+        }
+
+        if (!user || !user.token) {
+          throw new UnauthenticatedError('Unable to resolve user');
+        }
+
+        isAuthTokenValid(user.token);
+        return done(null, user);
       } catch (error) {
         return done(error);
       }
