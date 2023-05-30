@@ -4,12 +4,12 @@
   "description": "docker express typescript mongo",
   "main": "dist/index.js",
   "scripts": {
-    "eslint": "eslint src/server.ts",
+    "eslint": "eslint src/index.ts",
     "lint": "./node_modules/eslint/bin/eslint.js  src --ext .ts",
     "fix-lint": "./node_modules/eslint/bin/eslint.js  src --ext .ts --fix",
-    "test": "jest",
+    "test": "NODE_ENV=test jest --detectOpenHandles --runInBand",
     "dev": "NODE_ENV=development nodemon",
-    "ts-node-server": "ts-node src/server.ts"
+    "ts-node-server": "ts-node src/index.ts"
   },
   "engines": {
     "node": ">=18.16.0",

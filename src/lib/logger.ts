@@ -5,6 +5,7 @@ import {
   transports
 } from 'winston';
 import Transport from 'winston-transport';
+import { getDurationInMilliseconds, getRemoteHost } from '../utils';
 
 /**
  * https://stackoverflow.com/a/41407246
@@ -61,21 +62,17 @@ const logger = createLogger({
   level: process.env.NODE_ENV === 'development' ? 'silly' : 'info'
 });
 
-export function logResponseTime(req: Request, res: Response, next: NextFunction) {
-  const startHrTime = process.hrtime();
+export const logRequestsDetailed = async (req: Request, res: Response, next: NextFunction) => {
+  logger.info(`request (start):' ${req.method} ${req.originalUrl} | from ${getRemoteHost(req)}`);
 
-  res.on('finish', () => {
-    const elapsedHrTime = process.hrtime(startHrTime);
-    const elapsedTimeInMs = elapsedHrTime[0] * 1000 + elapsedHrTime[1] / 1e6;
-    const message = `${req.method} ${res.statusCode} ${elapsedTimeInMs}ms\t${req.path}`;
-    logger.log({
-      level: 'debug',
-      message,
-      consoleLoggerOptions: { label: 'API' }
-    });
+  const start = process.hrtime();
+  res.on('close', () => {
+    const resourceId = req.user ? (req.user as any).resourceId : '';
+    const durationInMilliseconds = getDurationInMilliseconds(start);
+    logger.info(`request (finish):' ${req.method} ${req.originalUrl} | from ${getRemoteHost(req)} | ${resourceId} | duration: ${durationInMilliseconds.toLocaleString()} ms`);
   });
 
   next();
-}
+};
 
 export default logger;

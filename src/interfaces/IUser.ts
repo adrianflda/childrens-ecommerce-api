@@ -1,4 +1,5 @@
 interface IUser {
+    id?: any,
     profile?: any,
     username: string,
     displayName?: string,

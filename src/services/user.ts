@@ -4,6 +4,8 @@ import UserModel, { IUserDB } from '../models/user';
 import { JWT_KEY, JWT_DURATION } from '../config';
 import UnauthenticatedError from '../errors/UnauthenticatedError';
 import BadRequest from '../errors/BadRequest';
+import { externalizeUser } from '../controllers/user';
+import IUser from '../interfaces/IUser';
 
 const jwtDuration: string = JWT_DURATION;
 
@@ -14,27 +16,12 @@ if (jwtKey === 'secret-key') {
 }
 
 /**
- *
- * @param username User name for the new admin to be created
- * @returns The created user or null if already exist
- */
-export const verifyAndCreateAdmin = async (username?: string): Promise<IUserDB | null> => {
-  const newUsername = username || 'admin';
-  const userFound = await UserModel.findOne({ username: newUsername });
-  return userFound || UserModel.create({
-    username: newUsername,
-    password: newUsername,
-    roles: ['user', 'admin']
-  });
-};
-
-/**
     *
     * @param username String
     * @param options Object
     * @returns An user if found or null
     */
-export const getUserByUsername = (
+export const getUserByUsername = async (
   username: string,
   options: any = {}
 ): Promise<IUserDB | null> => {
@@ -98,12 +85,14 @@ export const getUserById = (
 export const createUser = (
   username: string,
   password: string,
-  displayName?: string
+  displayName?: string,
+  roles?: string[]
 ): Promise<IUserDB | null> => {
   const user: Record<string, any> = {
     username: username.toLowerCase(),
     password,
-    displayName
+    displayName,
+    roles
   };
   return UserModel.create(user);
 };
@@ -119,7 +108,7 @@ export const createAuthToken = async (
   const token = jwt.sign(
     {
       user: {
-        _id: user._id,
+        id: user._id,
         username: user.username,
         roles: user.roles
       }
@@ -172,13 +161,7 @@ export const isAuthTokenValid = (
     */
 export const getUserForAuthToken = async (
   jwtToken: string
-): Promise<IUserDB | null> => {
-  const payload: any = jwt.verify(jwtToken, jwtKey);
-  if (payload) {
-    return UserModel.findById(payload.id);
-  }
-  return null;
-};
+): Promise<IUserDB | null> => UserModel.findOne({ token: jwtToken });
 
 export const updateUserRoles = async (userId: string, newRoles: string[]) => {
   if (!userId.trim()) {
@@ -188,4 +171,18 @@ export const updateUserRoles = async (userId: string, newRoles: string[]) => {
     throw new BadRequest('roles must be an array');
   }
   return UserModel.findByIdAndUpdate({ _id: userId }, { roles: newRoles });
+};
+
+/**
+ *
+ * @param username User name for the new admin to be created
+ * @returns The created user or null if already exist
+ */
+export const verifyAndCreateAdmin = async (username?: string): Promise<IUser | null> => {
+  const newUsername = username || 'admin';
+  let userFound: IUserDB | null = await UserModel.findOne({ username: newUsername });
+  if (!userFound) {
+    userFound = await createUser(newUsername, newUsername, newUsername, ['user', 'admin']);
+  }
+  return externalizeUser(userFound);
 };

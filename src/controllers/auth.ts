@@ -11,7 +11,7 @@ export const signupValidation = Joi.object({
   username: Joi.string()
     .alphanum()
     .min(3)
-    .max(10)
+    .max(30)
     .required()
     .messages({
       'string.base': 'username must be string',

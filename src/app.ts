@@ -1,47 +1,47 @@
-import bodyParser from 'body-parser';
-import compression from 'compression';
+import express, { Application } from 'express';
+import { Server } from 'http';
 import path from 'path';
-import express from 'express';
-import session from 'express-session';
-import cors from 'cors';
-import passport from 'passport';
-import routes from './routes';
-import { logResponseTime } from './lib/logger';
-import './middleware/passport';
-import initDatabase from './storage/mongo';
+import IContext from './interfaces/IContext';
+import IUser from './interfaces/IUser';
+import logger from './lib/logger';
+import { initMiddleware } from './middleware';
 import { handleError } from './middleware/errorHandler';
+import routes from './routes';
 import { verifyAndCreateAdmin } from './services/user';
-import { JWT_KEY, MONGO_URL } from './config';
+import { initDatabase } from './storage/mongo';
 
-initDatabase();
-verifyAndCreateAdmin();
+export const init = async (context: IContext) => {
+  logger.debug('Setting up database...');
+  await initDatabase(context.mongo);
 
-const app = express();
-// TODO setup origins
-app.use(cors());
+  logger.debug('Setting up the middlewares');
+  const app = express();
+  app.use(
+    express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 })
+  );
+  await initMiddleware(app);
+  app.use(routes);
+  app.use(handleError);
+  return app;
+};
 
-app.use(logResponseTime);
+export const start = async (context: IContext): Promise<IContext> => {
+  try {
+    const PORT = process.env.PORT || 3000;
+    context.app = context.app || await init(context);
+    context.server = context.app.listen(PORT, () => {
+      logger.info(`🌏 Express server started at http://localhost:${PORT}`);
+    });
+  } catch (e: any) {
+    logger.error(e.message);
+  }
+  return context;
+};
 
-app.use(compression() as any);
-
-app.use(bodyParser.json());
-
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use(
-  express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 })
-);
-
-app.use(session({
-  secret: JWT_KEY,
-  resave: false,
-  saveUninitialized: false
-}));
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use(routes);
-
-app.use(handleError);
-
-export default app;
+export const stop = (server: Server): void => {
+  try {
+    server.close();
+  } catch (e: any) {
+    logger.error(e.message);
+  }
+};
