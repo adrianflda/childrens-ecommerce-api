@@ -13,7 +13,7 @@ const runTests = async (context: IContext) => {
   ] = products;
 
   const user1ProductRes = await request(context.app)
-    .post('/product')
+    .post(getUrl('/product'))
     .send(product1)
     .set('Authorization', `Bearer ${context.users[TEST_USER_1.username].token}`);
   expect(user1ProductRes.status).toBe(403);
@@ -24,7 +24,7 @@ const runTests = async (context: IContext) => {
 
   for (const product of products) {
     const adminProductRes = await request(context.app)
-      .post('/product')
+      .post(getUrl('/product'))
       .send(product)
       .set('Authorization', `Bearer ${context.users.admin.token}`);
     expect(adminProductRes.status).toBe(200);

@@ -7,7 +7,7 @@ import IUser from '../interfaces/IUser';
    * This works on a 'one of' principal. The user being checked
    * should have one of the roles (or the role) specified as parameter.
    *
-   * @param roles
+   * @param roles The role or roles should have the user
    */
 const allowRole = (
   roles: string | string[]
@@ -24,9 +24,9 @@ const allowRole = (
 
     const userRoles = user.roles || [];
 
-    roles = Array.isArray(roles) ? roles : [roles];
+    const validRoles = Array.isArray(roles) ? roles : [roles];
 
-    const hasRole = !!roles.find(role => userRoles.includes(role));
+    const hasRole = !!validRoles.find(role => userRoles.includes(role));
 
     if (!hasRole) {
       throw new UnauthorizedError('You don\'t have enough permissions');

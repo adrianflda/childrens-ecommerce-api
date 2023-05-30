@@ -44,10 +44,10 @@ const runTests = async (context: IContext) => {
       roles: ['user', 'editor']
     })
     .set('Authorization', `Bearer ${context.users[TEST_USER_1.username].token}`);
-  expect(user1UpdateRes2.status).toBe(401);
+  expect(user1UpdateRes2.status).toBe(403);
   results.push({
-    name: 'User1 update roles should fail with 401 non admin requester',
-    status: user1UpdateRes2.status === 401 ? 'passed' : 'failed'
+    name: 'User1 update roles should fail with 403 non admin requester',
+    status: user1UpdateRes2.status === 403 ? 'passed' : 'failed'
   });
 
   return results;

@@ -53,6 +53,7 @@
       "error",
       "as-needed"
     ],
+    "radix":"off",
     "semi": "error",
     "no-extra-semi": 0,
     "import/no-unresolved": "off",

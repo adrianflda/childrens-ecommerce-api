@@ -1,7 +1,7 @@
 import IVotes from './IVote';
 
 interface IProduct {
-    id: string,
+    id?: any,
     sku: string,
     name: string,
     price: number,
@@ -10,7 +10,8 @@ interface IProduct {
     tags?: string[],
     description?: string,
     extraInfo?: string,
-    feedback?: IVotes,
+    // TODO this field should move to use a different collection Votes
+    feedBack?: IVotes,
     images?: string[]
 }
 export default IProduct;

@@ -1,5 +1,5 @@
 interface IVotes {
     votes: number,
-    starts: number
+    stars: number
 };
 export default IVotes;
