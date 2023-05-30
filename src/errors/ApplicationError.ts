@@ -1,4 +1,6 @@
-export default class ApplicationError extends Error {
+import IAplicationError from '../interfaces/IAplicationError';
+
+export default class ApplicationError extends Error implements IAplicationError {
   public message: string = 'ApplicationError';
 
   public status: number = 500;

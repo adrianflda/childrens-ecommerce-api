@@ -3,7 +3,7 @@ import {
 } from 'express';
 import Joi from 'joi';
 import BadRequest from '../errors/BadRequest';
-import logger from '../logger';
+import logger from '../lib/logger';
 
 /**
  * Helper to get message from Joi

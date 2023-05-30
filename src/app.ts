@@ -1,62 +1,47 @@
-import bodyParser from 'body-parser';
-import compression from 'compression';
+import express, { Application } from 'express';
+import { Server } from 'http';
 import path from 'path';
-import express, { Request, Response, NextFunction } from 'express';
-import ApplicationError from './errors/ApplicationError';
+import IContext from './interfaces/IContext';
+import IUser from './interfaces/IUser';
+import logger from './lib/logger';
+import { initMiddleware } from './middleware';
+import { handleError } from './middleware/errorHandler';
 import routes from './routes';
-import logger from './logger';
-import './middleware/passport';
-import initDatabase from './storage/mongo';
+import { verifyAndCreateAdmin } from './services/user';
+import { initDatabase } from './storage/mongo';
 
-initDatabase();
+export const init = async (context: IContext) => {
+  logger.debug('Setting up database...');
+  await initDatabase(context.mongo);
 
-const app = express();
+  logger.debug('Setting up the middlewares');
+  const app = express();
+  app.use(
+    express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 })
+  );
+  await initMiddleware(app);
+  app.use(routes);
+  app.use(handleError);
+  return app;
+};
 
-function logResponseTime(req: Request, res: Response, next: NextFunction) {
-  const startHrTime = process.hrtime();
-
-  res.on('finish', () => {
-    const elapsedHrTime = process.hrtime(startHrTime);
-    const elapsedTimeInMs = elapsedHrTime[0] * 1000 + elapsedHrTime[1] / 1e6;
-    const message = `${req.method} ${res.statusCode} ${elapsedTimeInMs}ms\t${req.path}`;
-    logger.log({
-      level: 'debug',
-      message,
-      consoleLoggerOptions: { label: 'API' }
+export const start = async (context: IContext): Promise<IContext> => {
+  try {
+    const PORT = process.env.PORT || 3000;
+    context.app = context.app || await init(context);
+    context.server = context.app.listen(PORT, () => {
+      logger.info(`🌏 Express server started at http://localhost:${PORT}`);
     });
-  });
-
-  next();
-}
-
-app.use(logResponseTime);
-
-app.use(compression() as any);
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use(
-  express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 })
-);
-
-app.use(routes);
-
-app.use(
-  (
-    err: ApplicationError,
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    if (res.headersSent) {
-      return next(err);
-    }
-
-    return res.status(err.status || 500).json({
-      error: err.message
-    });
+  } catch (e: any) {
+    logger.error(e.message);
   }
-);
+  return context;
+};
 
-export default app;
+export const stop = (server: Server): void => {
+  try {
+    server.close();
+  } catch (e: any) {
+    logger.error(e.message);
+  }
+};
