@@ -5,8 +5,12 @@ import IUser from '../src/interfaces/IUser';
 import logger from '../src/lib/logger';
 import { verifyAndCreateAdmin } from '../src/services/user';
 import { clearDatabase, disconnect } from '../src/storage/mongo';
+import errorTests from './error';
 import authTests from './auth';
 import userTests from './user';
+import productTests from './product';
+import { API_VERSION } from '../src/config';
+import { products } from './utils/product';
 
 const context: IContext = {
   env: 'test',
@@ -47,6 +51,38 @@ describe('General test suite', () => {
     const resp = await request(context.app)
       .get('/');
     expect(resp.status).toStrictEqual(200);
+  });
+
+  test('Basic test suite', async () => {
+    await request(context.app)
+      .get('/api/info')
+      .expect(200);
+
+    await request(context.app)
+      .get(`/api/${API_VERSION}/reset`)
+      .expect(404);
+  });
+
+  test('Error test suite', async () => {
+    const errorResults = await errorTests();
+    expect(errorResults).toEqual([
+      {
+        name: 'sets default error message',
+        status: 'passed'
+      },
+      {
+        name: 'sets correct message',
+        status: 'passed'
+      },
+      {
+        name: 'sets 500 as default status code',
+        status: 'passed'
+      },
+      {
+        name: 'sets correct status',
+        status: 'passed'
+      }
+    ]);
   });
 
   test('Auth test suite', async () => {
@@ -96,6 +132,25 @@ describe('General test suite', () => {
       },
       {
         name: 'User1 update roles should fail with 401 non admin requester',
+        status: 'passed'
+      }
+    ]);
+  });
+
+  test('Product test suite', async () => {
+    const productResults = await productTests(context);
+    const expectedResults = products.map(product => ({
+      name: `Product ${product.name} added successful with 200 by admin`,
+      status: 'passed'
+    }));
+    expect(productResults).toEqual([
+      {
+        name: 'Product add should fail with 403 unauthorized',
+        status: 'passed'
+      },
+      ...expectedResults,
+      {
+        name: 'Product update should fail with 403 unauthorized',
         status: 'passed'
       }
     ]);

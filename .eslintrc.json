@@ -28,6 +28,8 @@
         "null": "ignore"
       }
     ],
+    "no-await-in-loop": "off",
+    "no-restricted-syntax": "off",
     "no-underscore-dangle": [
       "error",
       {
