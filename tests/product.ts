@@ -29,7 +29,7 @@ const runTests = async (context: IContext) => {
       .set('Authorization', `Bearer ${context.users.admin.token}`);
     expect(adminProductRes.status).toBe(200);
     results.push({
-      name: 'Product added successful with 200 by admin',
+      name: `Product ${product.name} added successful with 200 by admin`,
       status: adminProductRes.status === 200 ? 'passed' : 'failed'
     });
   }
