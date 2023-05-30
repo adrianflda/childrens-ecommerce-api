@@ -28,6 +28,8 @@
         "null": "ignore"
       }
     ],
+    "no-await-in-loop": "off",
+    "no-restricted-syntax": "off",
     "no-underscore-dangle": [
       "error",
       {
@@ -51,6 +53,7 @@
       "error",
       "as-needed"
     ],
+    "radix":"off",
     "semi": "error",
     "no-extra-semi": 0,
     "import/no-unresolved": "off",

@@ -14,12 +14,12 @@ export const handleError = (
   let { message, status = 500 } = error;
 
   if (error instanceof UnauthorizedError) {
-    status = 401;
+    status = 403;
     message = message || 'You are not authorized';
   }
 
   if (error instanceof UnauthenticatedError) {
-    status = 403;
+    status = 401;
     message = message || 'Authentication required';
   }
 

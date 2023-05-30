@@ -1,4 +1,5 @@
-import { Request } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { ObjectId } from 'mongoose';
 import { BASE_URL } from '../config';
 
 export const getUrl = (
@@ -24,3 +25,48 @@ export const getDurationInMilliseconds = (
 export const getRemoteHost = (
   req: Request
 ): string => (req.headers['x-forwarded-for'] || req.socket?.remoteAddress) as string;
+
+export const paginate = (
+  limit: number,
+  minLimit: number,
+  maxLimit: number = 50
+) => (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.query.page && !Number.isNaN(parseInt(req.query.page as string, 10))) {
+    let page = parseInt(req.query.page as string, 10);
+    if (page < 1) {
+      page = 1;
+    }
+    req.query.page = page as any;
+  }
+
+  if (req.query.limit && !Number.isNaN(parseInt(req.query.limit as string))) {
+    let reqLimit = parseInt(req.query.limit as string);
+    if (reqLimit < minLimit) {
+      reqLimit = limit;
+    } else if (reqLimit > maxLimit) {
+      reqLimit = maxLimit;
+    }
+    req.query.limit = reqLimit as any;
+  } else {
+    req.query.limit = limit as any;
+  }
+
+  next();
+};
+
+/**
+ * Returns a boolean if value is defined, otherwise undefined.
+ * @param value
+ */
+export const booleanValue = (value: any): boolean => ['1', 1, 'yes', 'true', 'on', true].includes(value);
+
+export const removeAccents = (text: string): string => {
+  if (text) {
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+  return text;
+};

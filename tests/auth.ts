@@ -1,7 +1,5 @@
 import request from 'supertest';
 import IContext from '../src/interfaces/IContext';
-import IUser from '../src/interfaces/IUser';
-import logger from '../src/lib/logger';
 import { getUrl } from '../src/utils';
 import { signup, login } from './utils/tools';
 import {
@@ -77,10 +75,10 @@ const runTests = async (context: IContext) => {
     'password',
     'password'
   );
-  expect(user1SignupRes.status).toBe(401);
+  expect(user1SignupRes.status).toBe(403);
   results.push({
-    name: 'The signup should fail with 401, username already in use',
-    status: user1SignupRes.status === 401 ? 'passed' : 'failed'
+    name: 'The signup should fail with 403, username already in use',
+    status: user1SignupRes.status === 403 ? 'passed' : 'failed'
   });
 
   // Make a request to login with an existing user
@@ -104,10 +102,10 @@ const runTests = async (context: IContext) => {
     'password',
     '1234567'
   );
-  expect(user1SignupRes2.status).toBe(401);
+  expect(user1SignupRes2.status).toBe(403);
   results.push({
-    name: 'User1 signup should fail with 401 confirm password does not match',
-    status: user1SignupRes2.status === 401 ? 'passed' : 'failed'
+    name: 'User1 signup should fail with 403 confirm password does not match',
+    status: user1SignupRes2.status === 403 ? 'passed' : 'failed'
   });
 
   // Make a request with wrong password
@@ -116,10 +114,10 @@ const runTests = async (context: IContext) => {
     TEST_USER_1.username,
     'wrongPassword'
   );
-  expect(user1LoginRes2.status).toBe(401);
+  expect(user1LoginRes2.status).toBe(403);
   results.push({
-    name: 'User1 login should fail with 401 wrong username or password',
-    status: user1SignupRes2.status === 401 ? 'passed' : 'failed'
+    name: 'User1 login should fail with 403 wrong username or password',
+    status: user1SignupRes2.status === 403 ? 'passed' : 'failed'
   });
 
   // Make a request without token

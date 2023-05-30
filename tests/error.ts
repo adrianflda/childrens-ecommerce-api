@@ -2,25 +2,39 @@ import ApplicationError from '../src/errors/ApplicationError';
 
 const message = 'error message';
 
-describe('ApplicationError test suite', () => {
-  test('sets default error message', () => {
-    const error = new ApplicationError();
-    expect(error.message).toBe('ApplicationError');
+const runTests = () => {
+  const results: Record<string, string>[] = [];
+
+  let error = new ApplicationError();
+  expect(error.message).toBe('ApplicationError');
+  results.push({
+    name: 'sets default error message',
+    status: error.status === 500 ? 'passed' : 'failed'
   });
 
-  test('sets correct message', () => {
-    const error = new ApplicationError(message);
-    expect(error.message).toBe(message);
+  error = new ApplicationError(message);
+  expect(error.message).toBe(message);
+  results.push({
+    name: 'sets correct message',
+    status: error.status === 500 ? 'passed' : 'failed'
   });
 
-  test('sets 500 as default status code', () => {
-    const error = new ApplicationError(message);
-    expect(error.status).toBe(500);
+  error = new ApplicationError(message);
+  expect(error.status).toBe(500);
+  results.push({
+    name: 'sets 500 as default status code',
+    status: error.status === 500 ? 'passed' : 'failed'
   });
 
-  test('sets correct status', () => {
-    const status = 400;
-    const error = new ApplicationError(message, status);
-    expect(error.status).toBe(status);
+  const status = 400;
+  error = new ApplicationError(message, status);
+  expect(error.status).toBe(status);
+  results.push({
+    name: 'sets correct status',
+    status: error.status === status ? 'passed' : 'failed'
   });
-});
+
+  return results;
+};
+
+export default runTests;
