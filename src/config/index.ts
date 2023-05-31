@@ -3,8 +3,7 @@ export const {
   MONGO_URL = 'mongodb://127.0.0.1:27017/ecommerce',
   JWT_KEY = 'secret-key',
   JWT_DURATION = '30m',
-  SESSION_KEY = 'session-secret',
-  COOKIES_KEY
+  SESSION_KEY = 'session-secret'
 } = process.env;
 
 export const BASE_URL = `/api/${API_VERSION}`;
