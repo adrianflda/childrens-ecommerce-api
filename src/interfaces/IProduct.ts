@@ -1,10 +1,17 @@
 import IVotes from './IVote';
 
-interface IProduct {
+export interface ISimpleProduct {
     id?: any,
     sku: string,
     name: string,
     price: number,
+}
+
+export interface ISaleProduct extends ISimpleProduct {
+    quantity: number
+}
+
+interface IProduct extends ISimpleProduct {
     stock?: number,
     category?: string,
     tags?: string[],

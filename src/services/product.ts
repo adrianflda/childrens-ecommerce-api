@@ -1,28 +1,18 @@
-import { ObjectId, PipelineStage } from 'mongoose';
+import { isValidObjectId, ObjectId, PipelineStage } from 'mongoose';
 import NotFoundError from '../errors/NotFoundError';
 import IPaginateResponse from '../interfaces/IPaginateResponse';
 import IProduct from '../interfaces/IProduct';
-import IVotes from '../interfaces/IVote';
 import ProductModel, { IProductDB } from '../models/product';
-import { removeAccents } from '../utils';
 
 /**
  *
  * @param productIdentifier Could be mongo id or sku
  */
 export const getProduct = async (productIdentifier: string): Promise<IProductDB | null> => {
-  const search = {
-    $or: [
-      {
-        _id: productIdentifier
-      },
-      {
-        sku: productIdentifier
-      }
-    ]
-  };
-
-  return ProductModel.findOne(search);
+  if (isValidObjectId(productIdentifier)) {
+    return ProductModel.findById(productIdentifier);
+  }
+  return ProductModel.findOne({ sku: productIdentifier });
 };
 
 /**
@@ -157,6 +147,27 @@ export const updateProductVote = async (
 
   await ProductModel.updateOne({ _id: productId }, productUpdate);
   return ProductModel.findOne({ _id: productId });
+};
+
+/**
+ *
+ * @param productSku String the product sku to be updated
+ * @param quantityToReduce Number the quantity to be reduced after sell
+ */
+export const updateProductStockAfterSell = async (
+  productSku: string,
+  quantityToReduce: number,
+  session?: any
+): Promise<void> => {
+  /* await ProductModel.findOneAndUpdate(
+    { sku: productSku },
+    { $inc: { stock: -quantityToReduce } },
+    { session }
+  ); */
+  await ProductModel.findOneAndUpdate(
+    { sku: productSku },
+    { $inc: { stock: -quantityToReduce } }
+  );
 };
 
 /**

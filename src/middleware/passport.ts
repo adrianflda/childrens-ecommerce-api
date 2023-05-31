@@ -45,7 +45,11 @@ export const setupPassport = (passport: PassportStatic) => {
         done: any
       ) => {
         try {
-          const { confirmPassword } = req.body;
+          const {
+            confirmPassword,
+            displayName,
+            profile
+          } = req.body;
           if (!confirmPassword) {
             throw new UnauthorizedError('Confirm password is required');
           } else if (confirmPassword !== password) {
@@ -57,7 +61,14 @@ export const setupPassport = (passport: PassportStatic) => {
             throw new UnauthorizedError('Username is already in use');
           }
 
-          const user: IUserDB | null = await createUser(username, password);
+          const user: IUserDB | null = await createUser(
+            {
+              username,
+              displayName,
+              profile
+            },
+            password
+          );
           if (!user) {
             throw new UnauthorizedError('Something went wrong');
           }

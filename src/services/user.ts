@@ -83,18 +83,17 @@ export const getUserById = (
     * @returns The new created user
     */
 export const createUser = (
-  username: string,
-  password: string,
-  displayName?: string,
-  roles?: string[]
+  user: IUser,
+  password: string
 ): Promise<IUserDB | null> => {
-  const user: Record<string, any> = {
-    username: username.toLowerCase(),
+  const newUser: Record<string, any> = {
+    username: user.username.toLowerCase(),
     password,
-    displayName,
-    roles
+    displayName: user.displayName,
+    roles: user.roles,
+    profile: user.profile
   };
-  return UserModel.create(user);
+  return UserModel.create(newUser);
 };
 
 /**
@@ -182,7 +181,14 @@ export const verifyAndCreateAdmin = async (username?: string): Promise<IUser | n
   const newUsername = username || 'admin';
   let userFound: IUserDB | null = await UserModel.findOne({ username: newUsername });
   if (!userFound) {
-    userFound = await createUser(newUsername, newUsername, newUsername, ['user', 'admin']);
+    userFound = await createUser(
+      {
+        username: newUsername,
+        displayName: newUsername,
+        roles: ['user', 'admin']
+      },
+      newUsername
+    );
   }
   return externalizeUser(userFound);
 };

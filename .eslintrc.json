@@ -53,6 +53,7 @@
       "error",
       "as-needed"
     ],
+    "guard-for-in":"off",
     "radix":"off",
     "semi": "error",
     "no-extra-semi": 0,
