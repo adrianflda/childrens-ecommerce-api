@@ -2,9 +2,7 @@ import mongoose, { ConnectOptions, Mongoose } from 'mongoose';
 import { MONGO_URL } from '../config';
 import logger from '../lib/logger';
 
-let mongooseConnection: typeof mongoose;
-
-export const getConnection = () => mongooseConnection;
+export const getConnection = () => mongoose.connection;
 
 export const initDatabase = async (config?: any): Promise<Mongoose> => {
   mongoose.Promise = Promise;
@@ -19,7 +17,6 @@ export const initDatabase = async (config?: any): Promise<Mongoose> => {
   // import after connection established
   await import('../models');
 
-  mongooseConnection = connection;
   return connection;
 };
 

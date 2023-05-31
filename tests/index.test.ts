@@ -9,8 +9,10 @@ import errorTests from './error';
 import authTests from './auth';
 import userTests from './user';
 import productTests from './product';
+import saleOrderTests from './saleOrder';
 import { API_VERSION } from '../src/config';
 import { products } from './utils/product';
+import { saleOrders } from './utils/saleOrder';
 
 const context: IContext = {
   env: 'test',
@@ -93,7 +95,7 @@ describe('General test suite', () => {
         status: 'passed'
       },
       {
-        name: 'The signup should fail with 401, username already in use',
+        name: 'The signup should fail with 403, username already in use',
         status: 'passed'
       },
       {
@@ -101,11 +103,11 @@ describe('General test suite', () => {
         status: 'passed'
       },
       {
-        name: 'User1 signup should fail with 401 confirm password does not match',
+        name: 'User1 signup should fail with 403 confirm password does not match',
         status: 'passed'
       },
       {
-        name: 'User1 login should fail with 401 wrong username or password',
+        name: 'User1 login should fail with 403 wrong username or password',
         status: 'passed'
       },
       {
@@ -131,7 +133,7 @@ describe('General test suite', () => {
         status: 'passed'
       },
       {
-        name: 'User1 update roles should fail with 401 non admin requester',
+        name: 'User1 update roles should fail with 403 non admin requester',
         status: 'passed'
       }
     ]);
@@ -153,6 +155,21 @@ describe('General test suite', () => {
         name: 'Product update should fail with 403 unauthorized',
         status: 'passed'
       }
+    ]);
+  });
+
+  test('SaleOrder test suite', async () => {
+    const saleOrderResults = await saleOrderTests(context);
+    const expectedResults = saleOrders.map(saleOrder => ({
+      name: `SaleOrder ${saleOrder.code} added successful with 200 by admin`,
+      status: 'passed'
+    }));
+    expect(saleOrderResults).toEqual([
+      {
+        name: 'SaleOrder add should fail with 401 unauthenticated',
+        status: 'passed'
+      },
+      ...expectedResults
     ]);
   });
 });

@@ -7,9 +7,14 @@ interface IUserDB extends IUser, Document {}
 
 const UserSchema = new mongoose.Schema({
   profile: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Profile',
-    default: null
+    type: Object,
+    default: {
+      age: null,
+      gender: null,
+      email: null,
+      phone: null,
+      address: null
+    }
   },
   username: {
     type: String,

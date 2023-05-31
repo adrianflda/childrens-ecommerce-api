@@ -57,16 +57,3 @@ export const paginate = (
 
   next();
 };
-
-/**
- * Returns a boolean if value is defined, otherwise undefined.
- * @param value
- */
-export const booleanValue = (value: any): boolean => ['1', 1, 'yes', 'true', 'on', true].includes(value);
-
-export const removeAccents = (text: string): string => {
-  if (text) {
-    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  }
-  return text;
-};
