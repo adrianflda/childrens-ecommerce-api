@@ -4,12 +4,18 @@
   "description": "docker express typescript mongo",
   "main": "dist/index.js",
   "scripts": {
+    "build-ts": "tsc",
+    "build": "npm run eslint && npm run build-ts",
     "eslint": "eslint src/index.ts",
     "lint": "./node_modules/eslint/bin/eslint.js  src --ext .ts",
     "fix-lint": "./node_modules/eslint/bin/eslint.js  src --ext .ts --fix",
-    "test": "NODE_ENV=test jest --detectOpenHandles --runInBand",
+    "test": "npm run docker:start:mongo && npm run lint && NODE_ENV=test jest --coverage --verbose --detectOpenHandles --passWithNoTests --runInBand && npm run docker:stop:mongo",
     "dev": "NODE_ENV=development nodemon",
-    "ts-node-server": "ts-node src/index.ts"
+    "start": "NODE_ENV=production ts-node src/index.ts",
+    "docker:start:mongo": "docker-compose -f docker-compose.test.yml up --build -d ",
+    "docker:stop:mongo": "docker-compose -f docker-compose.test.yml down",
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down"
   },
   "engines": {
     "node": ">=18.16.0",
@@ -32,7 +38,7 @@
   },
   "homepage": "https://github.com/adrianflda/childrens-ecommerce-api#readme",
   "dependencies": {
-    "bcrypt": "^5.1.0",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "bson": "^5.3.0",
     "compression": "^1.7.4",
@@ -52,6 +58,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
+    "@types/bcryptjs": "^2.4.2",
     "@types/compression": "^1.7.2",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",

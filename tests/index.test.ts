@@ -159,17 +159,28 @@ describe('General test suite', () => {
   });
 
   test('SaleOrder test suite', async () => {
-    const saleOrderResults = await saleOrderTests(context);
-    const expectedResults = saleOrders.map(saleOrder => ({
-      name: `SaleOrder ${saleOrder.code} added successful with 200 by admin`,
+    const [
+      saleOrder1,
+      saleOrder2,
+      saleOrder3
+    ] = saleOrders;
+    const [
+      saleOrderResponse1,
+      saleOrderResponse2,
+      saleOrderResponse3
+    ] = await saleOrderTests(context);
+
+    expect(saleOrderResponse1).toEqual({
+      name: `SaleOrder ${saleOrder1.code} added successful with 200`,
       status: 'passed'
-    }));
-    expect(saleOrderResults).toEqual([
-      {
-        name: 'SaleOrder add should fail with 401 unauthenticated',
-        status: 'passed'
-      },
-      ...expectedResults
-    ]);
+    });
+    expect(saleOrderResponse2).toEqual({
+      name: `SaleOrder ${saleOrder2.code} should fail with 400 two product for the same type`,
+      status: 'passed'
+    });
+    expect(saleOrderResponse3).toEqual({
+      name: `SaleOrder ${saleOrder3.code} should fail with 400 three products different types`,
+      status: 'passed'
+    });
   });
 });

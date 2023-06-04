@@ -1,11 +1,18 @@
+# Stage 1: Build the app and run tests
 FROM node:18.16.0
-
-RUN apt-get update
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install --verbose
+RUN npm install
 
-RUN npm run test
+COPY . .
+
+RUN npm run build
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "start"]

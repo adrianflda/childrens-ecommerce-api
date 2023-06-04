@@ -21,9 +21,12 @@ JWT_DURATION=30m
 
 SESSION_KEY=session-secret
 ```
-- run `npm install`
-- if you get any tsc error you might need to install typescript globally (`npm i -g typescript`)
-- run `docker-compose up`, this will create 2 containers mongo (port 27017), api (port 3000)
+
+### Test project
+- run `npm run test`, this will create 1 container mongo (port 27017) and run tests and finally will down the mongo docker container
+
+### Deploy locally
+- run `npm run docker:up`, this will create 2 containers mongo (port 27017), api (port 3000)
 
 ### Project details
 - navigate to `localhost:3000/` for home

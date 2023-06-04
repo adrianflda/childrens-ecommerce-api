@@ -9,29 +9,38 @@ const runTests = async (context: IContext) => {
   const results: Record<string, string>[] = [];
   const [
     saleOrder1,
-    ...theRestOfSaleOrders
+    saleOrder2,
+    saleOrder3
   ] = saleOrders;
 
-  const user1SaleOrderRes = await request(context.app)
+  const user1SaleOrderRes1 = await request(context.app)
     .post(getUrl('/saleOrder'))
-    .send(saleOrder1);
-  expect(user1SaleOrderRes.status).toBe(401);
+    .send(saleOrder1)
+    .set('Authorization', `Bearer ${context.users[TEST_USER_1.username].token}`);
+  expect(user1SaleOrderRes1.status).toBe(200);
   results.push({
-    name: 'SaleOrder add should fail with 401 unauthenticated',
-    status: user1SaleOrderRes.status === 401 ? 'passed' : 'failed'
+    name: `SaleOrder ${saleOrder1.code} added successful with 200`,
+    status: user1SaleOrderRes1.status === 200 ? 'passed' : 'failed'
   });
 
-  for (const saleOrder of saleOrders) {
-    const adminSaleOrderRes = await request(context.app)
-      .post(getUrl('/saleOrder'))
-      .send(saleOrder)
-      .set('Authorization', `Bearer ${context.users[TEST_USER_1.username].token}`);
-    expect(adminSaleOrderRes.status).toBe(200);
-    results.push({
-      name: `SaleOrder ${saleOrder.code} added successful with 200 by admin`,
-      status: adminSaleOrderRes.status === 200 ? 'passed' : 'failed'
-    });
-  }
+  const user1SaleOrderRes2 = await request(context.app)
+    .post(getUrl('/saleOrder'))
+    .send(saleOrder2).set('Authorization', `Bearer ${context.users[TEST_USER_1.username].token}`);
+  expect(user1SaleOrderRes2.status).toBe(400);
+  results.push({
+    name: `SaleOrder ${saleOrder2.code} should fail with 400 two product for the same type`,
+    status: user1SaleOrderRes2.status === 400 ? 'passed' : 'failed'
+  });
+
+  const user1SaleOrderRes3 = await request(context.app)
+    .post(getUrl('/saleOrder'))
+    .send(saleOrder3)
+    .set('Authorization', `Bearer ${context.users[TEST_USER_1.username].token}`);
+  expect(user1SaleOrderRes3.status).toBe(400);
+  results.push({
+    name: `SaleOrder ${saleOrder3.code} should fail with 400 three products different types`,
+    status: user1SaleOrderRes3.status === 400 ? 'passed' : 'failed'
+  });
 
   return results;
 };

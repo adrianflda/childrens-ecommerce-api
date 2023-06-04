@@ -87,6 +87,12 @@ export const createSaleOrderController: RequestHandler = async (
     if (!products || !products.length) {
       throw new BadRequest('Products are required');
     }
+    if (products.length > 1) {
+      throw new BadRequest('Only one type of product is allowed');
+    }
+    if (products[0].quantity > 1) {
+      throw new BadRequest('Only one product for type is allowed');
+    }
 
     const saleOrderResponse = await createSaleOrder(user as IUserDB, products);
     if (!saleOrderResponse) {
