@@ -11,18 +11,21 @@ export const saleOrders = [
         name: 'Product 1',
         price: 100,
         quantity: 1
-      },
+      }
+    ]
+  },
+  {
+    code: 'SO123456789',
+    user: {
+      username: 'johndoe',
+      displayName: 'John Doe'
+    },
+    products: [
       {
-        sku: 'DEF456',
-        name: 'Product 2',
-        price: 200,
+        sku: 'ABC123',
+        name: 'Product 1',
+        price: 100,
         quantity: 2
-      },
-      {
-        sku: 'GHI789',
-        name: 'Product 3',
-        price: 300,
-        quantity: 3
       }
     ]
   },
