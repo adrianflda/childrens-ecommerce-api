@@ -1,5 +1,5 @@
 import mongoose, { Document } from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import IUser from '../interfaces/IUser';
 import { SALT_FACTOR } from '../config';
 

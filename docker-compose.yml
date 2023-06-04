@@ -1,31 +1,30 @@
-version: '3.1'
+version: '3.8'
 
 services:
-  mongo:
-    image: bitnami/mongodb:5.0
-    ports:
-      - "27017:27017"
-    environment:
-      MONGODB_REPLICA_SET_MODE: primary
-      ALLOW_EMPTY_PASSWORD: 'yes'
-
   api:
     build:
       context: .
-      dockerfile: Dockerfile
-    depends_on:
-      - mongo
+    restart: "always"
     volumes:
       #Use the local app folder, but use a named volume for node_modules. This avoids conflicts with the local system.
       - ./:/app
     ports:
-      - 3000:3000
-    environment:
-      - API_VERSION=${API_VERSION}
-      - NODE_ENV=${NODE_ENV}
-      - MONGO_URL=${MONGO_URL}
-      - JWT_KEY=${JWT_KEY}
-      - JWT_DURATION=${JWT_DURATION}
-      - SESSION_KEY=${SESSION_KEY}
-    command: "npm run dev"
+      - "3000:3000"
+    env_file:
+      - .env
+    links:
+      - mongo
+    depends_on:
+      - mongo
 
+  mongo:
+    image: mongo
+    restart: "always"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo:/data/db
+
+volumes:
+  mongo:
+    name: mongo
